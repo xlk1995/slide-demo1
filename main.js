@@ -1,59 +1,56 @@
-let n ;
-初始化();
-let timer = setInterval(() =>{
-    makeLeave(getImage(n))
-    .one('transitionend',(e)=>{
-        makeEnter($(e.currentTarget))
-    })
-    makeCurrent(getImage(n+1))
-    n+=1
-},2000)
+let $buttons = $('#buttonWrapper>button')
+let $sildes = $('#slides')
+let $images = $sildes.children('img')   //获取所有的img
+let current = 0
 
-document.addEventListener('visibilitychange',function(e){
-    if(document.hidden){
-        window.clearInterval(timer)
-    }else{
-         timer = setInterval(() =>{
-            makeLeave(getImage(n))
-            .one('transitionend',(e)=>{
-                makeEnter($(e.currentTarget))
+makeFakeSlides()
+$sildes.css({transform:'translateX(-400px)'})
+
+bindEvents()
+
+function bindEvents(){
+    $buttons.eq(0).on('click',function(){
+        if(current === 2){
+            $sildes.css({transform:'translateX(-1600px)'})
+            .one('transitionend',function(){
+                $sildes.hide()
+                    .offset()   //如果hide之后show出问题了就可以用offset
+                $sildes.css({transform:'translateX(-400px)'})
+                    .show()
             })
-            makeCurrent(getImage(n+1))
-            n+=1
-        },2000)
-    }
-})
-
-
-
-
-
-function x(n){
-    if(n>3){
-        n=n%3;
-        if(n===0){
-            n=3
+        }else{
+            $sildes.css({transform:'translateX(-400px)'})
         }
-    }
-    return n;
+        current = 0
+    })
+    $buttons.eq(1).on('click',function(){
+        $sildes.css({transform:'translateX(-800px)'})
+        current =1
+    })
+    $buttons.eq(2).on('click',function(){
+         if(current === 0){
+            $sildes.css({transform:'translateX(0)'})
+            .one('transitionend',function(){
+                $sildes.hide()
+                    .offset()
+                $sildes.css({transform:'translateX(-1200px)'})
+                    .show()
+            })
+        }else{
+            $sildes.css({transform:'translateX(-1200px)'})
+        }
+        current = 2
+    })
 }
 
-function 初始化(){
-    n=1;
-    $(`.images>img:nth-child(${n})`).addClass("current")
-    .siblings().addClass('enter')
-}
 
-function getImage(n){
-    return $(`.images>img:nth-child(${x(n)})`)
-}
 
-function makeCurrent($node){
-    return $node.removeClass("leave enter").addClass("current")
-}
-function makeLeave($node){
-    return $node.removeClass("current enter").addClass("leave")
-}
-function makeEnter($node){
-    return $node.removeClass("current leave").addClass("enter")
+function makeFakeSlides(){
+    //克隆第一个和最后一个元素
+    let $firstCopy = $images.eq(0).clone(true)
+    let $lastCopy = $images.eq($images.length-1).clone(true) //加true就是复制元素及其子元素（全家）
+
+    //添加到slides的首尾
+    $sildes.append($firstCopy)
+    $sildes.prepend($lastCopy)
 }
